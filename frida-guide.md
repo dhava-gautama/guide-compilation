@@ -202,7 +202,9 @@ frida [options] -U -f <package-name> -l <script.js>
 - `-l` - Load script file
 - `-n` - Attach to process by name
 - `-p` - Attach to process by PID
-- `--no-pause` - Automatically resume the app
+- `--pause` - Pause the app on startup (since Frida 15.2.2, apps are NOT paused by default)
+
+**Note:** Starting from Frida 15.2.2, spawned applications are no longer paused by default. The `--no-pause` argument has been removed. If you need to pause the app on startup (e.g., to ensure your hooks are set up before the app runs), use the `--pause` flag instead.
 
 ### Method 1: Interactive REPL
 
@@ -235,8 +237,11 @@ Java.perform(function() {
 Run the script:
 
 ```bash
-# Spawn the app and inject script
-frida -U -f com.example.app -l hook.js --no-pause
+# Spawn the app and inject script (Frida 15.2.2+: app runs immediately by default)
+frida -U -f com.example.app -l hook.js
+
+# If you need the app to pause on startup (useful for early hooks)
+frida -U -f com.example.app -l hook.js --pause
 
 # Attach to already running app
 frida -U com.example.app -l hook.js
@@ -548,8 +553,11 @@ frida-ps -Uai
 # Attach to process by name
 frida -U -n com.example.app
 
-# Spawn app with script
-frida -U -f com.example.app -l script.js --no-pause
+# Spawn app with script (Frida 15.2.2+)
+frida -U -f com.example.app -l script.js
+
+# Spawn app with script and pause on startup
+frida -U -f com.example.app -l script.js --pause
 
 # Trace method calls
 frida-trace -U -f com.example.app -j '*!*login*/isu'
