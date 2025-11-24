@@ -6,6 +6,8 @@ A comprehensive guide to commonly used ADB commands for developers working with 
 
 - [ADB Setup](#adb-setup)
 - [Device Connection](#device-connection)
+  - [Finding MuMu Player Ports](#finding-mumu-player-ports)
+  - [Multiple Devices](#multiple-devices)
 - [Application Management](#application-management)
 - [Device Information](#device-information)
 - [Input Simulation](#input-simulation)
@@ -64,6 +66,33 @@ If you prefer to use a standalone ADB installation:
    Expected output: `127.0.0.1:7555 device`
 
 **Note**: If the device doesn't appear, repeat the kill-server and connect steps. The emulator may be using a different port.
+
+### Finding MuMu Player Ports
+
+If you're running multiple MuMu Player instances or need to find the correct port, use these commands:
+
+**PowerShell:**
+```powershell
+Get-NetTCPConnection -State Listen | Where-Object {$_.OwningProcess -in (Get-Process -Name "*MuMu*").Id} | Select-Object LocalAddress, LocalPort, @{Name="ProcessName";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | Format-Table -AutoSize
+```
+
+**PowerShell (simplified - MuMu ADB ports only):**
+```powershell
+Get-NetTCPConnection -State Listen | Where-Object {(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName -like "*MuMuVMM*" -and $_.LocalPort -match "^(555\d|755\d)$"} | Select-Object LocalAddress, LocalPort | Format-Table -AutoSize
+```
+
+**CMD (using netstat):**
+```cmd
+netstat -ano | findstr "LISTENING" | findstr "555"
+```
+
+**Common MuMu Player ports:**
+- First instance: `127.0.0.1:7555` or `127.0.0.1:5555`
+- Second instance: `127.0.0.1:5557`
+- Third instance: `127.0.0.1:5559`
+- Fourth instance: `127.0.0.1:5561`
+
+The pattern typically increments by 2 for each additional instance (5555, 5557, 5559, 5561...).
 
 ### Multiple Devices
 
